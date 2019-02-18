@@ -1,3 +1,18 @@
-FROM vmware/powerclicore:latest
-COPY /localcontent /localcontent
+#This is the dockerfile for a test of the CAMCONTAINER concept
+#Based on vmware/powerclicore, it adds some custom content so that it can be used as a portable script enviroment for CAM
+#Some scripts can be run autonamously. Others will rely on a local config file that is unique to the local enviroment where the container and its scripts are run
+#This proof of concept is public
 
+FROM vmware/powerclicore:latest
+
+LABEL authors="kloosterhuispro@gmail.com"
+
+#Make a directory for local content
+RUN mkdir -p /localcontent
+
+# Set working directory so stuff doesn't end up in /
+WORKDIR /localcontent
+
+#Copy content from https://github.com/thefluffysysop/camcontainercontent into /localcontent
+RUN mkdir /localcontent/vsanreport1
+RUN curl https://raw.githubusercontent.com/thefluffysysop/camcontainercontent/master/vsanreport1/vsanreport1.ps1 -o /localcontent/vsanreport1/vsanreport1.ps1
