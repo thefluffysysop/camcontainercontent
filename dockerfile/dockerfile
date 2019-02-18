@@ -1,0 +1,3 @@
+FROM vmware/powerclicore:latest
+COPY /localcontent /localcontent
+
