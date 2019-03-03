@@ -16,3 +16,18 @@ WORKDIR /localcontent
 #Copy content from https://github.com/thefluffysysop/camcontainercontent into /localcontent
 RUN mkdir /localcontent/vsanreport1
 RUN curl https://raw.githubusercontent.com/thefluffysysop/camcontainercontent/master/vsanreport1/vsanreport1.ps1 -o /localcontent/vsanreport1/vsanreport1.ps1
+
+#Suppress Certificate errors for vCenter Connections (not exactly best practice)
+Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+
+#suppress CEIP
+Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$false
+
+#Cleanup
+WORKDIR /
+
+
+
+
+
+
