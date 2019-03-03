@@ -7,6 +7,26 @@ FROM vmware/powerclicore:latest
 
 LABEL authors="kloosterhuispro@gmail.com"
 
+#Go into powershell to do some powershelly things
+SHELL [ "pwsh", "-command" ]
+
+#Suppress Certificate errors for vCenter Connections (not exactly best practice)
+RUN Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+
+#suppress CEIP
+RUN Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$false
+
+#Go into bash to do some bashy stuff
+SHELL [ "bash", "-c"]
+
+
+#Zip stuff
+
+#RUN tdnf install -y unzip
+
+
+
+
 #Make a directory for local content
 RUN mkdir -p /localcontent
 
@@ -17,16 +37,20 @@ WORKDIR /localcontent
 RUN mkdir /localcontent/vsanreport1
 RUN curl https://raw.githubusercontent.com/thefluffysysop/camcontainercontent/master/vsanreport1/vsanreport1.ps1 -o /localcontent/vsanreport1/vsanreport1.ps1
 
-#Suppress Certificate errors for vCenter Connections (not exactly best practice)
-RUN Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
-#suppress CEIP
-RUN Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$false
+
 
 #Cleanup
+
+#Set working dir back to root
 WORKDIR /
 
+#delete unzip package and clean everything else
+#RUN tdnf erase -y unzip && \
+#    tdnf clean all
 
+#Set defailt command back to running powershell
+CMD ["/bin/pwsh"]
 
 
 
