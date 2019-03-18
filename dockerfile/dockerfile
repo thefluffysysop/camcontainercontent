@@ -19,26 +19,30 @@ RUN Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$fa
 #Go into bash to do some bashy stuff
 SHELL [ "bash", "-c"]
 
+#Make a directory for local content (no longer used)
+#RUN mkdir -p /localcontent
 
-#Zip stuff
-
-#RUN tdnf install -y unzip
-
-
-
-
-#Make a directory for local content
-RUN mkdir -p /localcontent
+#Install Unzip
+RUN tdnf install -y unzip
 
 # Set working directory so stuff doesn't end up in /
-WORKDIR /localcontent
+WORKDIR /
 
+#Download all the local content from Github, unzip it, move it to /localcontent
+
+RUN curl -o ./camcontainercontent-master.zip -J -L https://github.com/thefluffysysop/camcontainercontent/archive/master.zip
+RUN unzip camcontainercontent-master.zip
+RUN rm -f camcontainercontent-master.zip
+RUN mv ./camcontainercontent-master ./localcontent
+
+
+#old style (no longer used)
 #Copy content from https://github.com/thefluffysysop/camcontainercontent into /localcontent
-RUN mkdir /localcontent/vsanreport1
-RUN curl https://raw.githubusercontent.com/thefluffysysop/camcontainercontent/master/vsanreport1/vsanreport1.ps1 -o /localcontent/vsanreport1/vsanreport1.ps1
+#RUN mkdir /localcontent/vsanreport1
+#RUN curl https://raw.githubusercontent.com/thefluffysysop/camcontainercontent/master/vsanreport1/vsanreport1.ps1 -o /localcontent/vsanreport1/vsanreport1.ps1
 
-
-
+# Set working directory so stuff doesn't end up in /
+WORKDIR /tmp
 
 #Cleanup
 
@@ -46,10 +50,10 @@ RUN curl https://raw.githubusercontent.com/thefluffysysop/camcontainercontent/ma
 WORKDIR /
 
 #delete unzip package and clean everything else
-#RUN tdnf erase -y unzip && \
-#    tdnf clean all
+RUN tdnf erase -y unzip && \
+    tdnf clean all
 
-#Set defailt command back to running powershell
+#Set default command back to running powershell
 CMD ["/bin/pwsh"]
 
 

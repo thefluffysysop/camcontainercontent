@@ -1,1 +1,0 @@
-This directory is the root of all local content to be downloaded to CAMCONTAINER

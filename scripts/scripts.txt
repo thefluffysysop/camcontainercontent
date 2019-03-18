@@ -1,0 +1,2 @@
+This directory contains all scripts that are to be added to /localcontent/scripts
+Each script is in its own directory
