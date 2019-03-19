@@ -20,39 +20,52 @@ From the perspective of the script and the Docker image, the parameter file is R
 0.1 - Initial
 #> 
 
+Write-Host "Begin script $PSCommandPath"
 
+# Load the remote parameters file
+$P=&("/remotecontent/parameters/parameters.ps1")
+#$P=&("c:\scripts\camcontainer_testing\parameters.ps1")
 
-# Load the script parameters
-$P=&("remotecontent\parameters\parameters.ps1")
-$P=&("c:\scripts\camcontainer_testing\parameters.ps1")
+# Get variables from the remote parameters file
 
-
-# Load the key
-$key = Import-Clixml -Path ($p.Scriptpath+$p.CredKey)
-
-# Get variables for this script
-
+$LocalDockerHost = $P.LocalDockerHost
 $vCenter1 = $P.vSphereServer
 $LocalColor = $P.localcolor
+#TODO - Replace hardcoded vSPhere Creds with PSCredential Objects dervied from encrypted keyfiles
+$vSphereUsername = $P.vSphereUsername
+$vSpherePassword = $P.vSpherePassword
+
+
 
 #Script Start
 
-Write-Output "----------------------------------------------------------------------------" -ForegroundColor $LocalColor 
-Write-Output "DEMO - Executing a LOCAL PS script using CAM|CONTAINER!" -ForegroundColor $LocalColor 
-Write-Output "This script runs from INSIDE the CAM|CONTAINER but uses REMOTE parameters to feed the script" -ForegroundColor $LocalColor 
-Write-Output "For example, this script will now connect to vCenter, " -ForegroundColor $LocalColor 
-Write-Output "using variables for credentials and vCenter FQDN, that it will get " -ForegroundColor $LocalColor 
-Write-Output "from the file /remotecontent/parameters/parameters.ps1" -ForegroundColor $LocalColor 
-Write-Output "This 'parameters' file could be different in every location the container is run" -ForegroundColor $LocalColor 
-Write-Output "----------------------------------------------------------------------------" -ForegroundColor $LocalColor 
-Write-Output "Local Information:" -ForegroundColor $LocalColor 
-Write-Output "vCenter: $vCenter1" -ForegroundColor $LocalColor 
-Write-Output "LocalDockerHost: $P.LocalDockerHost" -ForegroundColor $LocalColor 
-Write-Output "LocalColor: $LocalColor " -ForegroundColor $LocalColor 
-Write-Output "----------------------------------------------------------------------------" -ForegroundColor $LocalColor 
+Write-Host "----------------------------------------------------------------------------" -ForegroundColor $LocalColor 
+Write-Host "DEMO - Executing a LOCAL PS script using CAM|CONTAINER!" -ForegroundColor $LocalColor 
+Write-Host "This script runs from INSIDE the CAM|CONTAINER but uses REMOTE parameters to feed the script" -ForegroundColor $LocalColor 
+Write-Host "For example, this script will now connect to vCenter and get some VSCA information, " -ForegroundColor $LocalColor 
+Write-Host "using variables for credentials and vCenter FQDN, that it will get " -ForegroundColor $LocalColor 
+Write-Host "from the file /remotecontent/parameters/parameters.ps1" -ForegroundColor $LocalColor 
+Write-Host "This 'parameters' file could be different in every location the container is run" -ForegroundColor $LocalColor 
+Write-Host "----------------------------------------------------------------------------" -ForegroundColor $LocalColor 
+Write-Host "LOCAL INFORMATION" -ForegroundColor $LocalColor 
+Write-Host "LocalColor: $LocalColor" -ForegroundColor $LocalColor 
+Write-Host "vCenter: $vCenter1" -ForegroundColor $LocalColor 
+Write-Host "LocalDockerHost: $LocalDockerHost" -ForegroundColor $LocalColor
+Write-Host "vSphere Username to use: $vSphereUsername" -ForegroundColor $LocalColor
+Write-Host "----------------------------------------------------------------------------" -ForegroundColor $LocalColor 
+
 
 
 # Connect to the VI Server
-Connect-VIserver -Server $connectto -Credential (load-CPSCredential -path ($p.Scriptpath+$p.CredvSphere) -key $key) -force
+Write-Host "Connecting to vCenter using Connect-VIserver and Connect-CISServer" -ForegroundColor $LocalColor 
+Connect-VIserver -Server $vCenter1 -user $vSphereUsername -password $vSpherePassword -force
+Connect-CISServer -Server $vCenter1 -user $vSphereUsername -password $vSpherePassword -force
+
+#Running commands get-VAMISummary and get-VAMIHealth which are already included in vmware/powerclicore
+Write-Host "Running commands get-VAMISummary and get-VAMIHealth which are already included in vmware/powerclicore" -ForegroundColor $LocalColor 
+get-VAMISummary
+get-VAMIHealth
+
+Write-Host "End Script $PSCommandPath"
 
 
