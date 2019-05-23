@@ -1,11 +1,37 @@
 #This is the dockerfile for a test of the CAMCONTAINER concept
-#Based on vmware/powerclicore, it adds some custom content so that it can be used as a portable script enviroment for CAM
+#Based on vmware/photon2, it adds some custom content so that it can be used as a portable script enviroment for CAM
 #Some scripts can be run autonamously. Others will rely on a local config file that is unique to the local enviroment where the container and its scripts are run
 #This proof of concept is public
+# 23 May 2019: Added optimisations from https://github.com/vmware/powerclicore/commit/e3e1257d7b3e09bb1806055ad35e16e490c854eb and rebuilt dockerfile to build direct from vmware/photon2
 
-FROM vmware/powerclicore:latest
+
+FROM vmware/photon2
 
 LABEL authors="kloosterhuispro@gmail.com"
+
+
+ENV TERM linux
+
+WORKDIR /root
+
+# Set terminal. If we don't do this, weird readline things happen.
+# Install Powershell, Unzip, PackageManagement, PowerShellGet
+# Set PSGallery as a trusted Repo
+# Install PowerCLI, PowerNSX, PowervRA, Rubrik
+
+RUN echo "/usr/bin/pwsh" >> /etc/shells && \
+    echo "/bin/pwsh" >> /etc/shells && \
+    tdnf install -y powershell unzip && \
+    curl -O -J -L https://www.powershellgallery.com/api/v2/package/PackageManagement && \
+    unzip PackageManagement -d /usr/lib/powershell/Modules/PackageManagement && \
+    rm -f PackageManagement && \
+    curl -O -J -L https://www.powershellgallery.com/api/v2/package/PowerShellGet && \
+    unzip PowerShellGet -d /usr/lib/powershell/Modules/PowerShellGet && \
+    rm -f PowerShellGet && \
+    mkdir -p /usr/lib/powershell/ref/ && ln -s /usr/lib/powershell/*.dll /usr/lib/powershell/ref/ && \
+    pwsh -c "Set-PSRepository -Name PSGallery -InstallationPolicy Trusted" && \
+    pwsh -c "\$ProgressPreference = \"SilentlyContinue\"; Install-Module VMware.PowerCLI,PowerNSX,PowervRA,Rubrik"
+
 
 #Go into powershell to do some powershelly things
 SHELL [ "pwsh", "-command" ]
@@ -19,11 +45,10 @@ RUN Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$fa
 #Go into bash to do some bashy stuff
 SHELL [ "bash", "-c"]
 
-#Make a directory for local content (no longer used)
+#Make a directory for optional local content (no longer used)
 #RUN mkdir -p /localcontent
 
-#Install Unzip
-RUN tdnf install -y unzip
+
 
 # Set working directory to /
 WORKDIR /
@@ -35,13 +60,6 @@ unzip camcontainercontent-master.zip && \
 rm -f camcontainercontent-master.zip && \
 mv ./camcontainercontent-master ./localcontent && \
 chmod 755 ./localcontent
-
-
-#old style (no longer used)
-#Copy content from https://github.com/thefluffysysop/camcontainercontent into /localcontent
-#RUN mkdir /localcontent/vsanreport1
-#RUN curl https://raw.githubusercontent.com/thefluffysysop/camcontainercontent/master/vsanreport1/vsanreport1.ps1 -o /localcontent/vsanreport1/vsanreport1.ps1
-
 
 #Cleanup
 
