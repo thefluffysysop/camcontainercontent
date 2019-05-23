@@ -5,7 +5,7 @@
 # 23 May 2019: Added optimisations from https://github.com/vmware/powerclicore/commit/e3e1257d7b3e09bb1806055ad35e16e490c854eb and rebuilt dockerfile to build direct from vmware/photon2
 
 
-FROM vmware/photon:2.0-20190511
+FROM photon:2.0
 
 LABEL authors="kloosterhuispro@gmail.com"
 
