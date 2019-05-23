@@ -1,11 +1,11 @@
 #This is the dockerfile for a test of the CAMCONTAINER concept
-#Based on vmware/photon2, it adds some custom content so that it can be used as a portable script enviroment for CAM
+#Based on vmware/photon, it adds some custom content so that it can be used as a portable script enviroment for CAM
 #Some scripts can be run autonamously. Others will rely on a local config file that is unique to the local enviroment where the container and its scripts are run
 #This proof of concept is public
 # 23 May 2019: Added optimisations from https://github.com/vmware/powerclicore/commit/e3e1257d7b3e09bb1806055ad35e16e490c854eb and rebuilt dockerfile to build direct from vmware/photon2
 
 
-FROM vmware/photon2
+FROM vmware/photon:2.0-20190511
 
 LABEL authors="kloosterhuispro@gmail.com"
 
